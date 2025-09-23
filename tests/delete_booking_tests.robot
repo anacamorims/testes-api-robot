@@ -1,6 +1,7 @@
 *** Settings ***
 Resource    ../keywords/delete_booking_keywords.robot
-Library          RequestsLibrary
+Resource    ../keywords/auth_keywords.robot
+Resource    ../keywords/common_keywords.robot
 
 *** Test Cases ***
 Deletar Reserva Existente
@@ -12,6 +13,9 @@ Deletar Reserva Existente
     Should Be Equal As Integers    ${response.status_code}    201
 
 Deletar Reserva Inexistente
-    Create Session    api    ${BASE_URL}
-    ${response}=    Deletar Reserva    2
-    Should Be Equal As Integers    ${response.status_code}    201
+    Setup API Session
+    ${token}=    Obter Token
+    ${headers}=    Create Dictionary    Cookie=token=${token}
+    ${response}=    DELETE On Session    api    /booking/999999    headers=${headers}    expected_status=any
+    Should Be Equal As Integers    ${response.status_code}    ${STATUS_METHOD_NOT_ALLOWED}
+    Log    API retorna 405 para ID inexistente (comportamento esperado)

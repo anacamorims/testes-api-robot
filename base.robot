@@ -1,5 +1,6 @@
 *** Settings ***
-Library     RequestsLibrary
+Documentation    Arquivo base - DEPRECATED - Use config/variables.robot
+Resource         config/variables.robot
 
-*** Variables ***
-${BASE_URL}    https://restful-booker.herokuapp.com    
+# Este arquivo é mantido para compatibilidade
+# Novos testes devem usar config/variables.robot diretamente

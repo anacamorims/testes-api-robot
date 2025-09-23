@@ -1,25 +1,14 @@
 *** Settings ***
-Resource     ../base.robot
-Library     BuiltIn
-Library    Collections
-
-*** Variables ***
-${AUTH_URL}      ${BASE_URL}/auth
-${USERNAME}      admin
-${PASSWORD}      password123
+Resource     ../config/variables.robot
+Resource     common_keywords.robot
+Resource     auth_keywords.robot
 
 *** Keywords ***
-Obter Token De Autenticacao
-    ${auth_data}=    Create Dictionary    username=${USERNAME}    password=${PASSWORD}
-    ${response}=    POST    ${AUTH_URL}    json=${auth_data}
-    Should Be Equal As Integers    ${response.status_code}    200
-    ${token}=    Get From Dictionary    ${response.json()}    token
-    [Return]    ${token}
-
 Deletar Reserva
-    [Arguments]    ${booking_id}
-    ${token}=    Obter Token De Autenticacao
-    ${headers}=    Create Dictionary    Cookie=token=${token}
-    ${response}=    DELETE    ${BASE_URL}/booking/${booking_id}    headers=${headers}
-    Should Be Equal As Integers    ${response.status_code}    201
-    [Return]    ${response}
+    [Arguments]    ${booking_id}    ${token}=${EMPTY}
+    ${auth_token}=    Run Keyword If    '${token}' == '${EMPTY}'    Obter Token    ELSE    Set Variable    ${token}
+    Setup API Session
+    ${headers}=    Create Dictionary    Cookie=token=${auth_token}
+    ${response}=    DELETE On Session    api    /booking/${booking_id}    headers=${headers}    expected_status=any
+    Should Be Equal As Integers    ${response.status_code}    ${STATUS_CREATED}
+    RETURN    ${response}
